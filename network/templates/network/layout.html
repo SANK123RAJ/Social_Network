@@ -1,0 +1,141 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Social Network{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link href="{% static 'network/styles.css' %}" rel="stylesheet">
+        <script src="{% static 'network/index.js' %}">
+        </script>
+        <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+<style>
+    .insidecard{
+        display: flex; 
+        flex-direction: row;
+        align-items: center;
+        
+    
+    }
+    #time{
+        margin-left: auto;
+        font-size: 15px;
+        color: #5A5A5A;
+   
+    }
+    .headig{
+       
+        display: flex; 
+        flex-direction: row;
+       
+
+    }
+    #editbutton{
+        
+        background-color: green;
+        border-color: green;
+        color: white;
+        display: flex; 
+        
+       
+        position: absolute;
+        top: 7px;
+        left: 95%;
+        right: 20px;
+    }
+
+    #editsubmitbutton{
+        color: white;
+        position: relative;
+        left: 95%;
+         right: 0px;
+         top: -10px;
+         
+     }
+     
+     #likebutton1{
+        margin-top: 10px;
+        margin-left: 10px;
+     }
+     #likebutton2{
+        margin-top: 10px;
+        margin-left: 10px;
+     }
+
+    a{
+        color: white;
+    }
+    .div1{
+        display: flex; flex-direction: row;justify-content: center;
+    }
+    .divtwo{
+        display: flex; flex-direction: row;margin-left: 10px;
+
+    }
+    .divthree{
+        display: flex; flex-direction: row;margin-left: 20px;
+
+    }
+    .followerstag{
+        margin-left: 10px;margin-top: -5px;
+
+    }
+    .followstag{
+        margin-left: 10px;margin-top: -5px;
+
+    }
+    #folow{
+        margin-left: auto;
+        
+    }
+    #unfolow{
+        margin-left: auto;
+
+    }
+
+
+
+</style>
+    </head>
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Network</a
+          
+            <div>
+              <ul class="navbar-nav mr-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" id="user" href="{% url 'profile' id=request.user.id %}"><strong>{{ user.username }}</strong></a>
+                    </li>
+                {% endif %}
+                <li class="nav-item">
+                  <a class="nav-link" id="allpost" href="{% url 'index' %}">All Posts</a>
+                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" id="following" href="{% url 'followingpage' id=request.user.id %}" >Following</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    </li>
+                {% endif %}
+              </ul>
+            </div>
+          </nav>
+        
+        <div class="body">
+            {% block body %}
+            {% endblock %}
+        </div>
+    </body>
+</html>

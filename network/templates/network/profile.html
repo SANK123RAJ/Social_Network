@@ -1,0 +1,390 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+   <div id="allposts" class="page">
+    <div style="display: flex; flex-direction: row;margin-left: 10px;justify-content: space-between">
+        <h1>{{userprofile.username}}</h1>
+        <div id = "followbutton" style="display: flex; flex-direction: row;margin-left: 10px;">
+        <button type="button" class="btn btn-success" style=" margin-left: auto; height: 40px; margin-top: 17px;margin-right: 10px;">Follow</button></div>
+    </div>
+    
+    <hr>
+    <div id="placeoffollowers" class="div1">
+        <div  class="div2"><h4>Followers:<h2 class="followerstag">{{countoffollows}}</h2></h4></div>
+        <div  class="div3"><h4>Follows:<h2  class="followstag">{{countoffollowers}}</h2></h4></div>
+    </div>
+    <script type="text/babel" data-presets="react">
+        
+        
+        function Initializestate(){
+            
+            console.log("hello");
+            var followers = "{{countoffollows}}";
+            var follows = "{{countoffollowers}}";
+            followersname = "{{followers}}"
+            const [state, setState] = React.useState({
+            Followers: followers,
+            Follows: follows,
+            Isfollowed: followersname.includes("{{request.user}}")
+               });
+             console.log("hello");
+
+
+             ReactDOM.render(<Followbutton />, document.querySelector("#followbutton"));
+
+
+
+
+
+             return (<div id="placeoffollowers" class="div1">
+                <div  class="divtwo"><h4>Followers:           <h2 class="followerstag">{state.Followers}</h2></h4></div>
+                <div  class="divthree"><h4>Follows:           <h2  class="followstag">{state.Follows}</h2></h4></div>
+            </div>); 
+
+
+
+
+
+            function updateFollowers(action){
+                if( action == -1){
+                    setState(
+                        {
+                            Followers: parseInt(state.Followers) -1,
+                            Follows: state.Follows,
+                            Isfollowed: false
+                        }
+                    )
+                }
+                else{
+                    setState(
+                        {
+                            Followers: parseInt(state.Followers) +1,
+                            Follows: state.Follows,
+                            Isfollowed: true
+                        }
+                    )
+    
+                }
+                fetch('/updatefollows', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token if required by Django
+                    },
+                    body: JSON.stringify({
+                       id: "{{userprofile.id}}",
+                       act: state.Isfollowed
+                   })
+                 })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message)
+                    
+                })
+                .catch(error => {
+                    // Handle any error that occurred during the Fetch request
+                    console.error('Error:', error);
+                })
+
+
+            }
+    
+    
+    
+    
+    
+            function Followbutton(){
+                
+                const userprofile = "{{userprofile.id}}"
+                const currentuserid = "{{request.user.id}}"
+                followersname = "{{followers}}"
+                follow = {
+                    margin: '10px 10px 0px auto',
+                    color: 'white',
+                    height: '40px'
+                }
+                if(userprofile === currentuserid){
+                    console.log("userMATCH")
+                    return(<div></div>)
+                }
+                else{
+                    if(state.Isfollowed === true){
+                        console.log(followersname)
+                        return( <button type="button" className="btn btn-danger" idName="unfolow" onClick={() => updateFollowers(-1)} style={follow}>Unfollow</button>)
+    
+                       }
+                    else{
+                        console.log("NNOTTTinlistoffollowers")
+                        return( <button type="button" className="btn btn-success" idName="folow" onClick={() => updateFollowers(+1)} style={follow}>Follow</button>
+                        )
+                       
+                    }
+    
+    
+                    }
+                
+            }
+           
+        
+        }
+
+
+        function FollowAndFollowing() {
+            <Initializestate />
+          return (<h2>Hello</h2>);
+        }
+      
+        ReactDOM.render(<Initializestate />, document.querySelector("#placeoffollowers"));
+       
+      </script>
+
+   {% for post in allposts %}
+   
+  
+   <div id= "container"></div>
+   <script type="text/babel" data-presets="react">
+      var place = document.createElement('div')
+      place.style.border = "thin solid #D3D3D3";
+      place.style.margin = "10px 10px 10px 10px";
+      place.style.borderRadius = "10px"
+      function Card(props){
+         {% if user.is_authenticated %}
+         
+         const countOfLikes = {{ post.havelikes.count }};
+         const postsLikedByUser = {{ postslikedbyuser }};
+         const postId = {{ post.id }};
+         
+         const initialState = {
+           countOfLikes: countOfLikes,
+           isLiked: postsLikedByUser.includes(postId),
+         };
+         
+         const [state, setState] = React.useState(initialState);
+         
+
+         if(state.isLiked === false){
+            
+            //ReactDOM.render(<a class="btn btn-danger">DisLike</a>, document.querySelector(`.${postId}`) )
+         }
+         else{
+           // ReactDOM.render(<a class="btn btn-primary">Like</a>, document.querySelector(`.${postId}`) )
+          
+
+         }
+         {% endif %}
+         
+
+
+         function updatecontent(idofpost,event){
+            
+            let new_content = document.querySelector("#content-update").value;
+            fetch('/updatecontent', {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/x-www-form-urlencoded',
+                   'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token if required by Django
+               },
+               body: JSON.stringify({
+                  description: new_content,
+                  id: idofpost
+              })
+            })
+           .then(response => response.json())
+           .then(data => {
+               // Handle the response data, e.g., update the field in the template
+              var card = event.target.parentElement.parentElement;
+              card.innerHTML = '';
+              
+               card.innerHTML = data.description;
+               card = card.parentElement.parentElement;
+               console.log(card)
+               card.querySelector("#editbutton").style.display = 'block';
+               
+           })
+           .catch(error => {
+               // Handle any error that occurred during the Fetch request
+               console.error('Error:', error);
+           })
+
+         }
+
+       
+
+         
+
+         function FormEdit() {
+           
+        return (
+    <form>
+      <a class="btn btn-info" id = "editsubmitbutton" onClick={() => updatecontent(props.id,event)} >Submit</a>
+      <textarea className="form-control" aria-label="With textarea" name="description" id="content-update"></textarea>
+    </form>
+  );
+}
+
+
+function editcontent(event) {
+  let card = event.currentTarget.parentElement.parentElement;
+  card.querySelector("#editbutton").style.display = 'none';
+  ReactDOM.render(<FormEdit />, card.querySelector("#card-about"))
+  console.log("1sttttt")
+}
+
+
+function Updatelikes(changes){
+   if(changes == -1 && state.isLiked === true){
+      setState({
+         countOfLikes: state.countOfLikes - 1,
+         isLiked: false,
+      })
+
+   }
+   else{
+      setState({
+         countOfLikes: state.countOfLikes + 1,
+         isLiked: true,
+      })
+   }
+   fetch('/updateLikes', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token if required by Django
+      },
+      body: JSON.stringify({
+         isLiked: state.isLiked,
+         id: {{ post.id }}
+     })
+   })
+  .then(response => response.json())
+  .then(data => {
+   console.log(data.message)    
+  })
+  .catch(error => {
+      // Handle any error that occurred during the Fetch request
+      console.error('Error:', error);
+  })
+
+  
+}
+
+
+
+
+
+
+
+
+
+//actual cards
+         var currentuser = "{{request.user.username}}"
+         linkdecoration = {
+            textDecoration: 'none',
+            color: 'black'
+
+         }
+        if(props.name === currentuser){
+         return(<div class="card">
+            <div class="heading" > <a href="{% url 'profile' id=post.postedby.id %}" style={linkdecoration}><h4 class="card-header">{props.name}</h4></a>
+               <a  class="btn btn-primary" id = "editbutton" onClick= {editcontent}>Edit</a>
+            </div>
+           
+            <div class="card-body">
+              
+              <p class="card-text" id="card-about">{props.about}</p>
+              
+              <div class="insidecard">
+               
+               {state.isLiked ? (<button type="button" class="btn btn-secondary" onClick={()=> Updatelikes(-1)}>Dislike</button>) : (<button type="button" class="btn btn-primary" onClick={()=> Updatelikes(1)}>Like</button>)}
+           
+
+               <p class="card-text" id="likebutton1">Likes : <h3>{state.countOfLikes}</h3></p>
+               <p class="card-text" id="time">Posted on : {props.time}</p>
+
+            </div>
+              
+            </div>
+          </div>)
+         
+        }
+        else{
+         return(<div class="card">
+            <div> <a href="{% url 'profile' id=post.postedby.id %}" style={linkdecoration}><h4 class="card-header">{props.name}</h4></a>
+              
+            </div>
+           
+            <div class="card-body">
+              
+              <p class="card-text">{props.about}</p>
+              
+              <div class="insidecard">
+               {state.isLiked ? (<button type="button" class="btn btn-secondary" onClick={()=> Updatelikes(-1)}>Dislike</button>) : (<button type="button" class="btn btn-primary" onClick={()=> Updatelikes(1)}>Like</button>)}
+           
+               
+               <p class="card-text" id="likebutton2">Likes : <h3>{state.countOfLikes}</h3></p>
+               <p class="card-text" id="time">Posted on : {props.time}</p>
+
+            </div>
+              
+            </div>
+          </div>)
+        }
+         
+      }
+
+      function App(){
+         const user = "{{post.postedby}}";
+         const timestamp = "{{post.timestamp}}";   
+         const description = "{{post.description}}";
+         const likes = parseInt("{{post.havelikes.count}}");
+         const ids= parseInt("{{post.id}}");
+
+         
+         return(<div>
+            <Card name = {user} about = {description} likecount={likes} time={timestamp} id={ids} />  
+         </div> )
+      }
+      
+      ReactDOM.render(
+            <App />,
+            place
+            
+        );
+        document.querySelector("#container").append(place);
+        
+        
+        
+
+      
+   </script>
+{% endfor %}
+
+
+</div>
+<nav aria-label="Page navigation example">
+  
+   <ul class="pagination d-flex justify-content-center">
+      {% if allposts.has_previous %}
+      
+     <li class="page-item"><a class="page-link" href="?page={{allposts.previous_page_number}}">Previous</a></li>
+     {% endif %}
+     {% if allposts.has_next %}
+    
+     <li class="page-item"><a class="page-link" href="?page={{allposts.next_page_number}}">Next</a></li>
+     {% endif %}
+   </ul>
+ </nav>
+
+
+    
+   </div>
+   <div id="profile" class="page">
+    
+   </div>
+   <div class="page" id="followpage">
+      
+   </div>
+    
+    
+    
+{% endblock %}
